@@ -13,22 +13,31 @@ export class AppComponent implements OnInit{
   title = 'livetime';
 
   private _hubConnection: HubConnection;
+
   timestamps: any[] = []
 
    constructor( private http: HttpClientModule) { }
 
   ngOnInit(): void {
+    this.connectSignalR();
+    this.listen();
+  }
+  
+  connectSignalR() {
     this._hubConnection = new HubConnectionBuilder().withUrl('http://minisignalserver-dev.sa-east-1.elasticbeanstalk.com/chat').build()
     this._hubConnection.start()
     .then(()=> console.log('connection started'))
     .catch(err => console.log('error'))
+    .finally(()=> this.listen())
+    
+  }
 
+  listen(){
+    console.log('listening:')
     this._hubConnection.on('Streaming', (message)=> {
-      console.log(message.body)
+      console.log(message)
       this.timestamps.push(message)
     })
-
-    this._hubConnection.onclose(()=>{console.log(':(')})
+    this._hubConnection.onclose(()=>{console.log('connection closed')})
   }
-      
 }
